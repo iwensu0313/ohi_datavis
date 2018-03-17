@@ -1,0 +1,309 @@
+---
+title: "datavis"
+author: "Iwen Su"
+date: "February 26, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Load packages
+
+```{r pkg, message=FALSE}
+
+library(tidyverse)
+library(reshape2)
+library(plotly)
+
+```
+
+
+## Get data
+
+```{r get, message = F}
+
+setwd("C:/Iwen/Work/OHI/OHI_Home")
+scores_trend <- read_csv("C:/Iwen/Work/OHI/OHI_Home/scores_trend.csv")
+
+```
+
+## Create pairPlot function to plot pair-wise graph one at a time
+
+```{r}
+
+pairPlot <- function(g1, g2){
+  
+# isolate goal 1 scores
+goal1 <- scores_trend %>% 
+  filter(dimension == "trend") %>% 
+  filter(goal == g1) %>% 
+  select(-dimension) %>% 
+  na.omit()
+
+# isolate goal 1 scores
+goal2 <- scores_trend %>% 
+  filter(dimension == "trend") %>% 
+  filter(goal == g2) %>% 
+  select(-dimension) %>% 
+  na.omit()
+
+# join goal 1 and 2, matching based on year and region id
+goalscatter <- full_join(goal1, goal2, by = c("region_id","year")) %>% 
+  na.omit() %>% 
+  filter(year == 2017)
+
+# score.x is goal 1 score, score.y is goal 2 score
+
+# Plot data
+visual <- ggplot(goalscatter, aes(x = score.x, y = score.y)) +
+  geom_point(alpha = 0.4) +
+  theme_classic() +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0)
+
+return(visual)
+
+
+}
+
+```
+
+## Plot Goals Pair-wise
+Is there a clear trend or which quadrant do most of the points lie? 
+
+### Plot Biodiversity (BD) on x-axis
+
+```{r}
+
+pairPlot("BD","AO") # negative correlation that might depend on how biodiversity is managed typically and typical AO practices  
+pairPlot("BD","CS") # interesting pos corr
+pairPlot("BD","CW") # most of the dots fall in the negative-negative trend quadrant, would improving clean waters improve biodiversity? seems to be logical
+pairPlot("BD","LE")
+pairPlot("BD","CP") # interesting pos corr
+pairPlot("BD","FP")
+pairPlot("BD","NP")
+pairPlot("BD","SP") # Is low biodiversity scores just happen to associate with more special places because you need to protect more of the ocean?
+pairPlot("BD","TR")
+
+```
+
+
+### Plot Carbon Storage (CS) on x-axis
+
+```{r}
+
+pairPlot("CS","AO")
+pairPlot("CS","BD") # interesting pos corr
+pairPlot("CS","CW")
+pairPlot("CS","LE")
+pairPlot("CS","CP") # interesting pos corr
+pairPlot("CS","FP")
+pairPlot("CS","NP")
+pairPlot("CS","SP")
+pairPlot("CS","TR")
+
+```
+
+### Plot Clean Waters (CW) on x-axis
+ 
+```{r}
+
+pairPlot("CW","AO") # may have tradeoffs, but generally most place don't have clean waters, and how you clean up your water doesn't necessarily have to conflict with AO but AO practices can impact CW
+pairPlot("CW","CS") 
+pairPlot("CW","BD") # positive correlation as seen earlier
+pairPlot("CW","LE")
+pairPlot("CW","CP") 
+pairPlot("CW","FP")
+pairPlot("CW","NP")
+pairPlot("CW","SP") # somewhat negative correlation which perhaps is just due to people wanting to protect more places if cleanliness of waters is at risk
+pairPlot("CW","TR")
+
+```
+
+### Plot Coastal Livelihoods and Economies (LE)
+No visible patterns, maybe need to parse out some country clusters
+
+```{r}
+
+pairPlot("LE","AO")
+pairPlot("LE","CS") 
+pairPlot("LE","CW")
+pairPlot("LE","BD")
+pairPlot("LE","CP") 
+pairPlot("LE","FP")
+pairPlot("LE","NP")
+pairPlot("LE","SP")
+pairPlot("LE","TR")
+
+```
+
+### Plot Coastal Protection (CP)
+
+```{r}
+
+pairPlot("CP","AO")
+pairPlot("CP","CS") # interesting weak corr
+pairPlot("CP","CW")
+pairPlot("CP","LE")
+pairPlot("CP","BD") # interesting positive corr 
+pairPlot("CP","FP")
+pairPlot("CP","NP")
+pairPlot("CP","SP")
+pairPlot("CP","TR")
+
+```
+
+### Plot Food Provision (FP)
+Maybe parsing out country clusters/types will have a pattern
+
+```{r}
+
+pairPlot("FP","AO")
+pairPlot("FP","CS")
+pairPlot("FP","CW")
+pairPlot("FP","LE")
+pairPlot("FP","CP") 
+pairPlot("FP","BD")
+pairPlot("FP","NP")
+pairPlot("FP","SP")
+pairPlot("FP","TR")
+
+
+```
+
+### Plot Natural Products (NP)
+
+```{r}
+
+pairPlot("NP","AO")
+pairPlot("NP","CS") 
+pairPlot("NP","CW")
+pairPlot("NP","LE")
+pairPlot("NP","CP")
+pairPlot("NP","FP")
+pairPlot("NP","BD")
+pairPlot("NP","SP")
+pairPlot("NP","TR")
+
+```
+
+### Plot Sense of Place (SP)
+```{r}
+
+pairPlot("SP","AO")
+pairPlot("SP","CS") 
+pairPlot("SP","CW")
+pairPlot("SP","LE")
+pairPlot("SP","CP")
+pairPlot("SP","FP")
+pairPlot("SP","NP")
+pairPlot("SP","BD")
+pairPlot("SP","TR")
+
+```
+
+### Plot Tourism and recreation
+
+```{r}
+
+pairPlot("TR","AO")
+pairPlot("TR","CS") 
+pairPlot("TR","CW")
+pairPlot("TR","LE")
+pairPlot("TR","CP")
+pairPlot("TR","FP")
+pairPlot("TR","NP")
+pairPlot("TR","SP")
+pairPlot("TR","BD")
+
+```
+
+
+## Explore "Significant" Correlations 
+
+The interesting correlations are BD-CS, BD-CP, CS-CP
+
+```{r}
+
+# isolate goal 1 scores
+goal1 <- scores_trend %>% 
+  filter(dimension == "trend") %>% 
+  filter(goal == "BD") %>% 
+  select(-dimension) %>% 
+  na.omit()
+
+# isolate goal 2 scores
+goal2 <- scores_trend %>% 
+  filter(dimension == "trend") %>% 
+  filter(goal == "CP") %>% 
+  select(-dimension) %>% 
+  na.omit()
+
+# join goal 1 and 2, matching based on year and region id
+goalscatter <- full_join(goal1, goal2, by = c("region_id","year")) %>% 
+  na.omit() %>% 
+  filter(year == 2017)
+
+# read in data table with country names
+names <- read_csv("C:/Iwen/Work/OHI/OHI_Home/country_names.csv")
+
+# Combine data table with country names with 'goalscatter'
+goalscatter <- left_join(goalscatter, names, by = "region_id")
+
+# save as csv
+write.csv(goalscatter, "C:/Iwen/Work/OHI/OHI_Home/goalscatter.csv", row.names = F)
+
+
+# Plot data
+#ggplot(goalscatter, aes(x = score.x, y = score.y)) +
+#  geom_point(alpha = 0.4) +
+#  theme_classic() +
+#  ggtitle("Relationship in Trends of Biodiversity and \n Coastal Protection Goals for All Countries from 2013-2017") +
+#  theme(plot.title = element_text(hjust = 0.5)) +
+#  labs(x = "Biodiversity Trend", y = "Coastal Protection Trend") +
+#  geom_hline(yintercept = 0) +
+#  geom_vline(xintercept = 0) +
+
+
+israel <- list(x = 0.16, y = 1, text = "Israel", xref = "x", yref = "y", showarrow = TRUE, arrowhead = 7)
+montserrat <- list(x = -0.32, y = -1, text = "Montserrat", xref = "x", yref = "y", showarrow = TRUE, arrowhead = 7)
+lithuania <- list(x = -0.22, y = -0.75, text = "Lithuania", xref = "x", yref = "y", showarrow = TRUE, arrowhead = 7)
+uk <- list(x = 0.1, y = 0.89, text = "United Kingdom", xref = "x", yref = "y", showarrow = TRUE, arrowhead = 7)
+
+plot_ly(goalscatter, x = ~score.x, y = ~score.y, 
+        type = 'scatter', mode = 'markers', 
+        hoverinfo = 'text', text = ~paste('Country: ', region_name),  
+        marker = list(color = 'black'), showlegend = FALSE) %>% 
+  add_markers() %>%
+  layout(title = 'OHI Goal Trends for All Countries (2013-2017)',
+         xaxis = list(title = 'Biodiversity Trend'),
+         yaxis = list(title = 'Coastal Protection Trend'),
+         annotations = list(israel, montserrat, lithuania, uk)) 
+
+
+ 
+ggsave("cp_bd.jpeg", height = 7, width = 10)
+
+# Israel 79
+# UK 180
+# France 179
+# Lithuania 189
+# Montserrat 121
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

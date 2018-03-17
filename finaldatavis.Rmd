@@ -1,0 +1,65 @@
+---
+title: "Data Viz Final Project Draft"
+author: "Iwen Su"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include = FALSE}
+
+
+library(tidyverse)
+library(reshape2)
+library(plotly)
+
+# read in scores trend data
+scores_trend <- read_csv("C:/Iwen/Work/OHI/OHI_Home/scores_trend.csv")
+# read in data table with country names
+names <- read_csv("C:/Iwen/Work/OHI/OHI_Home/country_names.csv")
+
+# isolate goal 1 scores
+goal1 <- scores_trend %>% 
+  filter(dimension == "trend") %>% 
+  filter(goal == "BD") %>% 
+  select(-dimension) %>% 
+  na.omit()
+
+# isolate goal 1 scores
+goal2 <- scores_trend %>% 
+  filter(dimension == "trend") %>% 
+  filter(goal == "CP") %>% 
+  select(-dimension) %>% 
+  na.omit()
+
+# join goal 1 and 2, matching based on year and region id
+goalscatter <- full_join(goal1, goal2, by = c("region_id","year")) %>% 
+  na.omit() %>% 
+  filter(year == 2017)
+
+# Combine data table with country names with 'goalscatter'
+goalscatter <- left_join(goalscatter, names, by = "region_id")
+
+israel <- list(x = 0.16, y = 1, text = "Israel", xref = "x", yref = "y", showarrow = TRUE, arrowhead = 7)
+montserrat <- list(x = -0.32, y = -1, text = "Montserrat", xref = "x", yref = "y", showarrow = TRUE, arrowhead = 7)
+lithuania <- list(x = -0.22, y = -0.75, text = "Lithuania", xref = "x", yref = "y", showarrow = TRUE, arrowhead = 7)
+uk <- list(x = 0.1, y = 0.89, text = "United Kingdom", xref = "x", yref = "y", showarrow = TRUE, arrowhead = 7)
+
+```
+
+```{r echo=FALSE}
+
+plot_ly(goalscatter, x = ~score.x, y = ~score.y, 
+        type = 'scatter', mode = 'markers', 
+        hoverinfo = 'text', text = ~paste('Country: ', region_name),  
+        marker = list(color = 'black'), showlegend = FALSE) %>% 
+  add_markers() %>%
+  layout(title = 'OHI Goal Trends for All Countries (2013-2017)', font = list(size = 18),
+         xaxis = list(title = 'Biodiversity Trend', titlefont = list(size = 18)),
+         yaxis = list(title = 'Coastal Protection Trend', titlefont = list(size = 18)),
+         annotations = list(israel, montserrat, lithuania, uk)) 
+
+```
+
