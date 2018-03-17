@@ -17,6 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(reshape2)
 library(plotly)
+library(stringr)
 
 ```
 
@@ -25,12 +26,12 @@ library(plotly)
 
 ```{r get, message = F}
 
-setwd("C:/Iwen/Work/OHI/OHI_Home")
-scores_trend <- read_csv("C:/Iwen/Work/OHI/OHI_Home/scores_trend.csv")
+scores_trend <- read_csv("raw/scores_trend.csv")
 
 ```
 
-## Create pairPlot function to plot pair-wise graph one at a time
+
+## Create pairPlot function to plot pair-wise graph
 
 ```{r}
 
@@ -58,21 +59,64 @@ goalscatter <- full_join(goal1, goal2, by = c("region_id","year")) %>%
 # score.x is goal 1 score, score.y is goal 2 score
 
 # Plot data
-visual <- ggplot(goalscatter, aes(x = score.x, y = score.y)) +
+myplot <- ggplot(goalscatter, aes(x = score.x, y = score.y)) +
   geom_point(alpha = 0.4) +
   theme_classic() +
   geom_hline(yintercept = 0) +
-  geom_vline(xintercept = 0)
+  geom_vline(xintercept = 0) +
+  labs(title = paste("Trend in", g1, "and", g2, "across all Countries", sep =" "))
 
-return(visual)
-
+ggsave(filename = paste("figures/goalpairs/",g1,"_",g2,"_trend.png",sep=""))
 
 }
 
 ```
 
-## Plot Goals Pair-wise
+
+## Create a list of goal pairs to feed into a `for()` loop
+## Plot Goals Pair-wise in a `for` function and save with `ggsave`
 Is there a clear trend or which quadrant do most of the points lie? 
+
+```{r}
+
+# Create a data frame with all the paired-combinations of the 10 goals
+# remove ICO, Index, and subgoals
+# Create vectors for the first and second part of the goal-pair combinations
+goal_list <- scores_trend %>% 
+         filter(goal %in% c("AO","BD","CP","CS","CW","FP","LE","NP","SP","TR"))
+
+goal_list <- unique(goal_list$goal) 
+goal_list <- combn(goal_list, 2, simplify = FALSE)
+goal_df <- data.frame(goal_list)
+
+colnames(goal_df) <- 1:ncol(goal_df)
+goal_df <- data.frame(t(goal_df))
+colnames(goal_df) <- c("g1","g2")
+
+goal_df$g1 <- as.character(goal_df$g1)
+goal_df$g2 <- as.character(goal_df$g2)
+
+g1_list <- goal_df$g1
+g2_list <- goal_df$g2
+
+# create sub-folder `goalpairs` if it doesn't exist
+if(dir.exists("figures/goalpairs") == "FALSE"){
+  dir.create("figures/goalpairs")
+}
+
+
+
+mapply(pairPlot, g1 = g1_list, g2 = g2_list)
+  
+
+```
+
+
+
+
+
+
+
 
 ### Plot Biodiversity (BD) on x-axis
 
